@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">TrExpense</string>
+    <string-array name="currency_list">
+        <item>United States Dollar (USD)</item>
+        <item>Euro (EUR)</item>
+        <item>British Pound (GBP)</item>
+        <item>Japanese Yen (JPY)</item>
+        <item>Australian Dollar (AUD)</item>
+        <item>Canadian Dollar (CAD)</item>
+        <item>Swiss Franc (CHF)</item>
+        <item>Chinese Yuan (CNY)</item>
+        <item>Indian Rupee (INR)</item>
+        <item>Brazilian Real (BRL)</item>
+        <item>South African Rand (ZAR)</item>
+        <item>New Zealand Dollar (NZD)</item>
+        <item>Singapore Dollar (SGD)</item>
+        <item>Hong Kong Dollar (HKD)</item>
+        <item>Norwegian Krone (NOK)</item>
+        <item>Swedish Krona (SEK)</item>
+        <item>Mexican Peso (MXN)</item>
+        <item>Russian Ruble (RUB)</item>
+        <item>Turkish Lira (TRY)</item>
+    </string-array>
+</resources>

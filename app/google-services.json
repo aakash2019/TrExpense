@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "705320773746",
+    "project_id": "trexpense-2f94d",
+    "storage_bucket": "trexpense-2f94d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:705320773746:android:1c486f8b51bb5ff5e23aeb",
+        "android_client_info": {
+          "package_name": "com.example.demo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQG8DoCiBzq4PtH9w-3ZiFOFMXJpAM7KA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:705320773746:android:b678a32854abf769e23aeb",
+        "android_client_info": {
+          "package_name": "com.example.trexpense_2f94d"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQG8DoCiBzq4PtH9w-3ZiFOFMXJpAM7KA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
