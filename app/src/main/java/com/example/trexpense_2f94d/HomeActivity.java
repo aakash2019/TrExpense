@@ -1,9 +1,12 @@
 package com.example.trexpense_2f94d;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import androidx.activity.EdgeToEdge;
@@ -15,6 +18,9 @@ import androidx.core.view.WindowInsetsCompat;
 public class HomeActivity extends AppCompatActivity {
     private Spinner currencySpinner;
     private String selectedCurrency;
+
+    private EditText walletNameInput, balanceInput;
+    private Button createWalletButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +36,27 @@ public class HomeActivity extends AppCompatActivity {
         currencySpinner = findViewById(R.id.currencySpinner);
 
         setupCurrencySpinner();
+
+        walletNameInput = findViewById(R.id.walletNameInput);
+        balanceInput = findViewById(R.id.balanceInput);
+        createWalletButton = findViewById(R.id.createWalletButton);
+
+        createWalletButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String walletName = walletNameInput.getText().toString();
+                String initialBalance = balanceInput.getText().toString();
+
+                // Create intent to pass data to MainActivity
+                Intent intent = new Intent(HomeActivity.this, MainActivity.class);
+                intent.putExtra("walletName", walletName);
+                intent.putExtra("balance", initialBalance);
+
+                // Start HomeActivity
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void setupCurrencySpinner() {
