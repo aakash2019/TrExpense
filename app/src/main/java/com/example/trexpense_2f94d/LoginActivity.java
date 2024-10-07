@@ -8,7 +8,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -86,7 +85,7 @@ public class LoginActivity extends AppCompatActivity {
                         // Sign in success, redirect to home screen
                         FirebaseUser user = firebaseAuth.getCurrentUser();
                         Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                        Intent intent = new Intent(LoginActivity.this, CreateWalletActivity.class);
                         startActivity(intent);
                         finish(); // Close the login activity
                     } else {

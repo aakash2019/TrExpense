@@ -10,7 +10,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -119,7 +118,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 .set(userProfile)
                                 .addOnSuccessListener(aVoid -> {
                                     // Document was successfully written
-                                    Intent intent = new Intent(SignUpActivity.this, HomeActivity.class);
+                                    Intent intent = new Intent(SignUpActivity.this, CreateWalletActivity.class);
                                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                     startActivity(intent);
                                 })

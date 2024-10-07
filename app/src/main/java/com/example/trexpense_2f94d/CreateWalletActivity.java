@@ -15,7 +15,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class HomeActivity extends AppCompatActivity {
+public class CreateWalletActivity extends AppCompatActivity {
     private Spinner currencySpinner;
     private String selectedCurrency;
     private Button createWalletButton;
@@ -26,7 +26,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_create_wallet);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -47,28 +47,8 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void walletButton (){
-        Intent intent = new Intent(HomeActivity.this, TabsActivity.class);
+        Intent intent = new Intent(CreateWalletActivity.this, TabsActivity.class);
         startActivity(intent);
-        walletNameInput = findViewById(R.id.walletNameInput);
-        balanceInput = findViewById(R.id.balanceInput);
-        createWalletButton = findViewById(R.id.createWalletButton);
-
-        createWalletButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String walletName = walletNameInput.getText().toString();
-                String initialBalance = balanceInput.getText().toString();
-
-                // Create intent to pass data to MainActivity
-                Intent intent = new Intent(HomeActivity.this, MainActivity.class);
-                intent.putExtra("walletName", walletName);
-                intent.putExtra("balance", initialBalance);
-
-                // Start HomeActivity
-                startActivity(intent);
-            }
-        });
-
     }
 
     private void setupCurrencySpinner() {
