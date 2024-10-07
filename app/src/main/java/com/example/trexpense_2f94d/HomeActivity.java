@@ -1,9 +1,11 @@
 package com.example.trexpense_2f94d;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 
 import androidx.activity.EdgeToEdge;
@@ -15,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 public class HomeActivity extends AppCompatActivity {
     private Spinner currencySpinner;
     private String selectedCurrency;
+    private Button createWalletButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +31,21 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         currencySpinner = findViewById(R.id.currencySpinner);
+        createWalletButton = findViewById(R.id.createWalletButton);
 
         setupCurrencySpinner();
+
+        createWalletButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                walletButton();
+            }
+        });
+    }
+
+    private void walletButton (){
+        Intent intent = new Intent(HomeActivity.this, TabsActivity.class);
+        startActivity(intent);
     }
 
     private void setupCurrencySpinner() {
