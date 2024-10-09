@@ -67,7 +67,7 @@ public class ProfileFragment extends Fragment {
             if (documentSnapshot.exists()) {
                 String firstName = documentSnapshot.getString("firstName");
                 String lastName = documentSnapshot.getString("lastName");
-                String currency = documentSnapshot.getString("currency");
+                fetchWalletData();
 
                 String name = firstName + " " + lastName;
                 // Update UI with fetched data
@@ -105,7 +105,6 @@ public class ProfileFragment extends Fragment {
 
             }
         });
-        Toast.makeText(getContext(), String.valueOf(userBalance), Toast.LENGTH_SHORT).show();
     }
 
     private void createNewWallet() {
