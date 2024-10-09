@@ -2,6 +2,7 @@ package com.example.trexpense_2f94d;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -10,13 +11,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 import java.util.UUID;
-
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,6 +22,7 @@ public class CreateWalletActivity extends AppCompatActivity {
     private String selectedCurrency;
     private Button createWalletButton;
     private FirebaseFirestore db;
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +31,7 @@ public class CreateWalletActivity extends AppCompatActivity {
 
         // Initialize Firebase Firestore
         db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
         // Initialize views
         walletNameInput = findViewById(R.id.walletNameInput);
