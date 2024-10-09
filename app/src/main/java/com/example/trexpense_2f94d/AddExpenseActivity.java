@@ -25,20 +25,5 @@ public class AddExpenseActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        // Initialize views
-        expenseNameEditText = findViewById(R.id.expenseNameEditText);
-        expenseAmountEditText = findViewById(R.id.expenseAmountEditText);
-        saveExpenseButton = findViewById(R.id.saveExpenseButton);
-
-        // Save expense and return to HomeActivity
-        saveExpenseButton.setOnClickListener(v -> {
-            String expenseName = expenseNameEditText.getText().toString();
-            String expenseAmount = expenseAmountEditText.getText().toString();
-
-            // Here, you would add code to save this expense (e.g., to a database or a list)
-
-            // After saving, return to the HomeActivity
-            finish(); // Ends the AddExpenseActivity and returns to the previous screen
-        });
     }
 }

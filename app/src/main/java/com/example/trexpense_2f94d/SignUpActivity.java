@@ -112,9 +112,11 @@ public class SignUpActivity extends AppCompatActivity {
                         FirebaseUser user = mAuth.getCurrentUser();
                         Toast.makeText(SignUpActivity.this, "Sign Up Successful.", Toast.LENGTH_SHORT).show();
 
+                        String userId = user.getUid();
+
                         // Create a user profile in Firestore
-                        UserProfile userProfile = new UserProfile(firstName, lastName, email, currency);
-                        db.collection("users").document(user.getUid())
+                        UserProfile userProfile = new UserProfile(firstName, lastName, email, currency, userId);
+                        db.collection("users").document(userId)
                                 .set(userProfile)
                                 .addOnSuccessListener(aVoid -> {
                                     // Document was successfully written
@@ -136,18 +138,24 @@ public class SignUpActivity extends AppCompatActivity {
         private String lastName;
         private String email;
         private String currency;
+        private String userId;
 
         // Constructor
-        public UserProfile(String firstName, String lastName, String email, String currency) {
+        public UserProfile(String firstName, String lastName, String email, String currency, String userId) {
             this.firstName = firstName;
             this.lastName = lastName;
             this.email = email;
             this.currency = currency;
+            this.userId = userId;
         }
 
         // Getter for firstName
         public String getFirstName() {
             return firstName;
+        }
+
+        public String getUserId() {
+            return userId;
         }
 
         // Setter for firstName

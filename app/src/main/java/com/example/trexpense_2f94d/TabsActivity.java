@@ -24,7 +24,7 @@ public class TabsActivity extends AppCompatActivity {
         fragmentMap = new HashMap<>();
         fragmentMap.put(R.id.nav_home, new HomeFragment());
         fragmentMap.put(R.id.nav_dashboard, new DashboardFragment());
-        fragmentMap.put(R.id.nav_notifications, new NotificationsFragment());
+        fragmentMap.put(R.id.nav_add, new AddFragment());
         fragmentMap.put(R.id.nav_profile, new ProfileFragment());
 
         // Set HomeFragment as the default fragment
