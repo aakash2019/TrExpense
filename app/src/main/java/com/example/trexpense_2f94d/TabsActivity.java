@@ -23,7 +23,7 @@ public class TabsActivity extends AppCompatActivity {
         // Create a map of fragments to avoid switch cases
         fragmentMap = new HashMap<>();
         fragmentMap.put(R.id.nav_home, new HomeFragment());
-        fragmentMap.put(R.id.nav_dashboard, new DashboardFragment());
+        fragmentMap.put(R.id.nav_transactions, new TransactionsFragment());
         fragmentMap.put(R.id.nav_add, new AddFragment());
         fragmentMap.put(R.id.nav_profile, new ProfileFragment());
 
