@@ -82,7 +82,7 @@ public class ProfileFragment extends Fragment {
 
     private void fetchWalletData() {
         String userId = auth.getCurrentUser().getUid(); // Get current user ID
-
+        userBalance = 0;
         CollectionReference walletsRef = db.collection("users").document(userId).collection("wallets");
 
         walletsRef.get().addOnCompleteListener(task -> {
