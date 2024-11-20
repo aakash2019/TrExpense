@@ -31,8 +31,7 @@ public class ProfileFragment extends Fragment {
     private TextView userBalanceTextView;
     private Button createWalletButton;
     private Button editWalletButton;
-
-
+    private Button logoutButton;
     private FirebaseFirestore db;
     private FirebaseAuth auth;
     private String userId;
@@ -53,6 +52,7 @@ public class ProfileFragment extends Fragment {
         userBalanceTextView = view.findViewById(R.id.userBalanceTextView);
         createWalletButton = view.findViewById(R.id.createWalletButton);
         editWalletButton = view.findViewById(R.id.editWalletButton);
+        logoutButton = view.findViewById(R.id.logoutButton);
 
         // Fetch and display user information from Firestore
         fetchUserProfile();
@@ -66,10 +66,24 @@ public class ProfileFragment extends Fragment {
             editWalletButton();
         });
 
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logoutUser();
+            }
+        });
+
         return view;
     }
 
+    private void logoutUser() {
+        // Sign out the user
+        auth.signOut();
 
+        // Redirect to LoginActivity after successful logout
+        Intent intent = new Intent(getContext(), LoginActivity.class);
+        startActivity(intent);  // Optional: To close the current activity and remove it from the stack
+    }
 
     private void fetchUserProfile() {
         // Fetching user data from Firestore (assuming the document structure contains 'username' and 'balance')

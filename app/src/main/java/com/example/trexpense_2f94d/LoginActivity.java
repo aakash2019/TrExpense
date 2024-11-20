@@ -2,7 +2,6 @@ package com.example.trexpense_2f94d;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,11 +16,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText emailInput; // Changed to match your XML ID
-    private EditText passwordInput; // Changed to match your XML ID
+    private EditText emailInput;
+    private EditText passwordInput;
     private Button loginButton;
-    private TextView forgotPassword; // Changed to match your XML ID
-    private TextView signUpText; // Changed to match your XML ID
+    private TextView forgotPassword;
+    private TextView signUpText;
 
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore db;
@@ -33,6 +32,15 @@ public class LoginActivity extends AppCompatActivity {
 
         // Initialize Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+        // Check if the user is already logged in
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser != null) {
+            // User is already logged in, skip the login screen and go directly to TabsActivity
+            checkWallet(currentUser);
+            return;
+        }
 
         emailInput = findViewById(R.id.emailInput);
         passwordInput = findViewById(R.id.passwordInput);
@@ -66,8 +74,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loginUser() {
-        String email = emailInput.getText().toString().trim(); // Changed to match your XML ID
-        String password = passwordInput.getText().toString().trim(); // Changed to match your XML ID
+        String email = emailInput.getText().toString().trim();
+        String password = passwordInput.getText().toString().trim();
 
         if (email.isEmpty()) {
             emailInput.setError("Email is required");
@@ -85,20 +93,15 @@ public class LoginActivity extends AppCompatActivity {
         firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Sign in success, redirect to home screen
                         FirebaseUser user = firebaseAuth.getCurrentUser();
-
-                        Intent intent = new Intent(LoginActivity.this, TabsActivity.class);
-                        startActivity(intent);
-                        finish();
+                        checkWallet(user);  // Check if user has a wallet already
                     } else {
-                        // If sign in fails, display a message to the user.
                         Toast.makeText(LoginActivity.this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    private void checkWallet(FirebaseUser user){
+    private void checkWallet(FirebaseUser user) {
         String userId = user.getUid();
         db.collection("users").document(userId)
                 .collection("wallets")
@@ -111,17 +114,15 @@ public class LoginActivity extends AppCompatActivity {
                             Intent intent = new Intent(LoginActivity.this, TabsActivity.class);
                             startActivity(intent);
                             finish();
-                            Log.d("FirestoreCheck", "Collection 'transactions' exists with documents.");
                         } else {
                             // The collection is empty (no documents, might not exist)
                             Intent intent = new Intent(LoginActivity.this, CreateWalletActivity.class);
                             startActivity(intent);
                             finish();
-                            Log.d("FirestoreCheck", "Collection 'transactions' does not exist or is empty.");
                         }
                     } else {
                         // Handle the error
-                        Log.d("FirestoreCheck", "Error checking collection: ", task.getException());
+                        Toast.makeText(LoginActivity.this, "Error checking wallet: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
