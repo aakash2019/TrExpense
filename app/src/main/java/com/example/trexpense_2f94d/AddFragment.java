@@ -14,7 +14,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -29,23 +31,24 @@ import java.util.Map;
 import java.util.UUID;
 
 public class AddFragment extends Fragment {
-    private TextView addTransactionHeading;
+
     private Button currencyButton;
     private EditText balanceEditText;
     private TextView selectCategoryTextView, noteTextView, dateTextView, walletTextView;
-    private List<Wallet> wallets; // List to hold wallet objects
-    private String selectedWalletId; // To store selected wallet ID
+    private List<Wallet> wallets;
+    private String selectedWalletId;
+    private String selectedWalletName;
     private Double selectedWalletBalance;
-    private FirebaseFirestore db; // Firestore instance
+    private FirebaseFirestore db;
     private FirebaseAuth auth;
 
+    private static final String DEFAULT_WALLET_NAME = "Default Wallet";
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add, container, false);
 
-        addTransactionHeading = view.findViewById(R.id.addTransactionHeading);
         currencyButton = view.findViewById(R.id.currencyButton);
         balanceEditText = view.findViewById(R.id.balanceEditText);
         selectCategoryTextView = view.findViewById(R.id.selectCategoryTextView);
@@ -59,8 +62,8 @@ public class AddFragment extends Fragment {
 
         wallets = new ArrayList<>();
 
-        // Fetch wallets from Firestore
-        fetchWalletsFromFirebase();
+        // Fetch current wallet from Firestore
+        fetchCurrentWallet();
 
         // Set click listeners
         currencyButton.setOnClickListener(v -> {
@@ -74,53 +77,74 @@ public class AddFragment extends Fragment {
 
         addButton.setOnClickListener(v -> uploadTransaction());
 
-        // Automatically focus on balance input when the fragment is opened
         balanceEditText.requestFocus();
 
         return view;
     }
 
-    private void fetchWalletsFromFirebase() {
-        String userId = auth.getCurrentUser().getUid(); // Get current user ID
+    private void fetchCurrentWallet() {
+        String userId = auth.getCurrentUser().getUid();
 
         db.collection("users").document(userId)
-                .collection("wallets")
-                .get()
+                .get() // Get the user document
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            String walletId = document.getId();
-                            String walletName = document.getString("name");
-                            double walletBalance = document.getDouble("balance");
-                            wallets.add(new Wallet(walletId, walletName, walletBalance));
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            String currentWalletId = document.getString("currentWallet");
+
+                            if (currentWalletId != null) {
+                                // Fetch wallet details using currentWalletId
+                                fetchWalletDetails(currentWalletId);
+                            } else {
+                                Toast.makeText(getContext(), "No current wallet found", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(getContext(), "User not found", Toast.LENGTH_SHORT).show();
                         }
+                    } else {
+                        Toast.makeText(getContext(), "Failed to fetch user data", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
+    private void fetchWalletDetails(String walletId) {
+        db.collection("users")
+                .document(auth.getCurrentUser().getUid())
+                .collection("wallets")
+                .document(walletId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        selectedWalletId = documentSnapshot.getId();
+                        selectedWalletName = documentSnapshot.getString("name");
+                        selectedWalletBalance = documentSnapshot.getDouble("balance");
+
+                        // Update UI with wallet details
+                        walletTextView.setText(selectedWalletName);
+                    } else {
+                        Toast.makeText(getContext(), "Wallet not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to fetch wallet data", Toast.LENGTH_SHORT).show());
+    }
+
     private void openCategoryDialog() {
-        // Implement a dialog to choose category and set selected category
         String[] categories = getResources().getStringArray(R.array.category_array);
         new AlertDialog.Builder(getActivity())
                 .setTitle("Select Category")
-                .setItems(categories, (dialog, which) -> {
-                    selectCategoryTextView.setText(categories[which]);
-                })
+                .setItems(categories, (dialog, which) -> selectCategoryTextView.setText(categories[which]))
                 .show();
     }
 
     private void openNoteDialog() {
-        // Implement a dialog to input note
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Enter Note");
 
         EditText input = new EditText(getActivity());
         builder.setView(input);
 
-        builder.setPositiveButton("Done", (dialog, which) -> {
-            String note = input.getText().toString();
-            noteTextView.setText(note);
-        });
+        builder.setPositiveButton("Done", (dialog, which) -> noteTextView.setText(input.getText().toString()));
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
         builder.show();
     }
@@ -131,31 +155,52 @@ public class AddFragment extends Fragment {
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-//      Dialog box to show date
         DatePickerDialog datePickerDialog = new DatePickerDialog(dateTextView.getContext(), (view, year1, month1, dayOfMonth) -> {
             String date = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
             dateTextView.setText(date);
         }, year, month, day);
 
-//        Show the dialog
         datePickerDialog.show();
     }
 
     private void openWalletDialog() {
-        // Implement a dialog to select wallet
-        String[] walletNames = new String[wallets.size()];
-        for (int i = 0; i < wallets.size(); i++) {
-            walletNames[i] = wallets.get(i).getName();
-        }
+        // Fetch all available wallets for the user
+        db.collection("users")
+                .document(auth.getCurrentUser().getUid())
+                .collection("wallets")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<String> walletNames = new ArrayList<>();
+                    List<String> walletIds = new ArrayList<>();
 
-        new AlertDialog.Builder(getActivity())
-                .setTitle("Select Wallet")
-                .setItems(walletNames, (dialog, which) -> {
-                    selectedWalletId = wallets.get(which).getId();
-                    selectedWalletBalance = wallets.get(which).getBalance();
-                    walletTextView.setText(walletNames[which]);
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        walletNames.add(document.getString("name"));
+                        walletIds.add(document.getString("id"));
+                    }
+
+                    new AlertDialog.Builder(getActivity())
+                            .setTitle("Select Wallet")
+                            .setItems(walletNames.toArray(new String[0]), (dialog, which) -> {
+                                String selectedWalletName = walletNames.get(which);
+                                String selectedWalletId = walletIds.get(which);
+                                // Update currentWallet in the user document with the selected wallet ID
+                                updateCurrentWallet(selectedWalletName, selectedWalletId);
+                            })
+                            .show();
                 })
-                .show();
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Error fetching wallets", Toast.LENGTH_SHORT).show());
+    }
+
+    private void updateCurrentWallet(String walletName, String walletId) {
+        String userId = auth.getCurrentUser().getUid();
+
+        db.collection("users").document(userId)
+                .update("currentWallet", walletId) // Update current wallet reference
+                .addOnSuccessListener(aVoid -> {
+                    walletTextView.setText(walletName); // Update wallet name in the UI
+//                    Toast.makeText(getContext(), "Wallet updated", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Error updating wallet", Toast.LENGTH_SHORT).show());
     }
 
     private void uploadTransaction() {
@@ -165,24 +210,30 @@ public class AddFragment extends Fragment {
         String date = dateTextView.getText().toString();
         String dateToUpload;
 
-        // Check if no date is selected (if dateTextView still shows "Today")
         if (date.equals("Today")) {
-            // Get the current date
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            dateToUpload = dateFormat.format(new Date()); // Use the current date
+            dateToUpload = dateFormat.format(new Date());
         } else {
-            dateToUpload = date; // Use the selected date
+            dateToUpload = date;
         }
 
-        if (transactionAmountStr.isEmpty() || category.equals("Select Category") || selectedWalletId == null) {
-            // Show error message
+        if (transactionAmountStr.isEmpty() || category.equals("Select Category")) {
+            Toast.makeText(getContext(), "Please fill all required fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (selectedWalletId == null) {
+            Toast.makeText(getContext(), "No wallet selected", Toast.LENGTH_SHORT).show();
             return;
         }
 
         double transactionAmount = Double.parseDouble(transactionAmountStr);
-        double newBalance = selectedWalletBalance;
 
-        // Create transaction data
+        if (transactionAmount > selectedWalletBalance) {
+            Toast.makeText(getContext(), "Insufficient balance!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Map<String, Object> transactionData = new HashMap<>();
         transactionData.put("amount", transactionAmount);
         transactionData.put("category", category);
@@ -190,79 +241,44 @@ public class AddFragment extends Fragment {
         transactionData.put("date", dateToUpload);
 
         String transactionId = UUID.randomUUID().toString();
-
-        String userId = auth.getCurrentUser().getUid(); // Get current user ID
-
-
-        if(transactionAmount > newBalance){
-            Toast.makeText(getContext(), "You don't have sufficient balance!", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        String userId = auth.getCurrentUser().getUid();
 
         db.collection("users").document(userId)
                 .collection("wallets").document(selectedWalletId)
-                .collection("transactions").document(transactionId)
+                .collection("transactions")
+                .document(transactionId)
                 .set(transactionData)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        // Handle successful transaction upload
-                        updateWalletBalance(db, userId, selectedWalletId, transactionAmount);
-                        resetFields();
-                    } else {
-                        // Handle error
-                    }
-                });
+                .addOnSuccessListener(aVoid -> {
+                    // Update wallet balance
+                    selectedWalletBalance -= transactionAmount;
 
-    }
+                    Map<String, Object> updatedWalletData = new HashMap<>();
+                    updatedWalletData.put("balance", selectedWalletBalance);
 
+                    db.collection("users").document(userId)
+                            .collection("wallets").document(selectedWalletId)
+                            .update(updatedWalletData);
 
-    private void updateWalletBalance(FirebaseFirestore db, String userId, String walletId, double amount) {
-        // Fetch the current balance from the wallet
-        db.collection("users").document(userId)
-                .collection("wallets").document(walletId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        if (selectedWalletBalance != 0) {
-                            double newBalance = selectedWalletBalance - amount;
-
-                            // Update the wallet document with the new balance
-                            db.collection("users").document(userId)
-                                    .collection("wallets").document(walletId)
-                                    .update("balance", newBalance)
-                                    .addOnSuccessListener(aVoid -> {
-                                        // Successfully updated the wallet balance
-                                        Toast.makeText(getContext(), "Wallet balance updated", Toast.LENGTH_SHORT).show();
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        // Handle any errors
-                                        Toast.makeText(getContext(), "Error updating balance: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                    });
-                        }
-                    }
+                    Toast.makeText(getContext(), "Transaction uploaded", Toast.LENGTH_SHORT).show();
+                    clearFields();
                 })
-                .addOnFailureListener(e -> {
-                    // Handle any errors when fetching the wallet document
-                    Toast.makeText(getContext(), "Error fetching wallet: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Error uploading transaction", Toast.LENGTH_SHORT).show());
     }
 
-
-
-    private void resetFields() {
+    private void clearFields() {
         balanceEditText.setText("");
         selectCategoryTextView.setText("Select Category");
-        noteTextView.setText("Note");
+        noteTextView.setText("");
         dateTextView.setText("Today");
-        walletTextView.setText("Wallet");
     }
 
-    private static class Wallet {
+    // Wallet class for storing wallet details
+    public static class Wallet {
         private String id;
         private String name;
-        private double balance;
+        private Double balance;
 
-        public Wallet(String id, String name, double balance) {
+        public Wallet(String id, String name, Double balance) {
             this.id = id;
             this.name = name;
             this.balance = balance;
@@ -272,12 +288,12 @@ public class AddFragment extends Fragment {
             return id;
         }
 
-        public double getBalance() {
-            return balance;
-        }
-
         public String getName() {
             return name;
+        }
+
+        public Double getBalance() {
+            return balance;
         }
     }
 }

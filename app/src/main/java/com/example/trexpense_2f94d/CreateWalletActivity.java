@@ -75,10 +75,17 @@ public class CreateWalletActivity extends AppCompatActivity {
             db.collection("users").document(userId).collection("wallets").document(walletId)
                     .set(wallet)
                     .addOnSuccessListener(documentReference -> {
-                        Toast.makeText(CreateWalletActivity.this, "Wallet created successfully", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(CreateWalletActivity.this, TabsActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
+                        // Add this wallet to the currentWallet document
+                        db.collection("users").document(userId).update("currentWallet", walletId)
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(CreateWalletActivity.this, "Wallet created and set as current wallet", Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(CreateWalletActivity.this, TabsActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(CreateWalletActivity.this, "Error updating current wallet: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(CreateWalletActivity.this, "Error creating wallet: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -87,6 +94,7 @@ public class CreateWalletActivity extends AppCompatActivity {
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void setupCurrencySpinner() {
         // Load currency array from resources

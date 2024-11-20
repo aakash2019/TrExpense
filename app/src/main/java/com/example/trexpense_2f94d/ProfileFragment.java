@@ -1,5 +1,6 @@
 package com.example.trexpense_2f94d;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +19,9 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -27,12 +30,13 @@ public class ProfileFragment extends Fragment {
     private TextView usernameTextView;
     private TextView userBalanceTextView;
     private Button createWalletButton;
+    private Button editWalletButton;
+
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
     private String userId;
     private double userBalance = 0.0;
-
 
     @Nullable
     @Override
@@ -48,6 +52,7 @@ public class ProfileFragment extends Fragment {
         usernameTextView = view.findViewById(R.id.usernameTextView);
         userBalanceTextView = view.findViewById(R.id.userBalanceTextView);
         createWalletButton = view.findViewById(R.id.createWalletButton);
+        editWalletButton = view.findViewById(R.id.editWalletButton);
 
         // Fetch and display user information from Firestore
         fetchUserProfile();
@@ -57,8 +62,14 @@ public class ProfileFragment extends Fragment {
             createNewWallet();
         });
 
+        editWalletButton.setOnClickListener(v -> {
+            editWalletButton();
+        });
+
         return view;
     }
+
+
 
     private void fetchUserProfile() {
         // Fetching user data from Firestore (assuming the document structure contains 'username' and 'balance')
@@ -111,4 +122,37 @@ public class ProfileFragment extends Fragment {
         Intent intent = new Intent(getContext(), CreateWalletActivity.class);
         startActivity(intent);
     }
+
+    private void editWalletButton(){
+            // Fetch all available wallets for the user
+            db.collection("users")
+                    .document(auth.getCurrentUser().getUid())
+                    .collection("wallets")
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        List<String> walletNames = new ArrayList<>();
+                        List<String> walletIds = new ArrayList<>();
+
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                            walletNames.add(document.getString("name"));
+                            walletIds.add(document.getString("id"));
+                        }
+
+                        new AlertDialog.Builder(getActivity())
+                                .setTitle("Select Wallet")
+                                .setItems(walletNames.toArray(new String[0]), (dialog, which) -> {
+                                    String selectedWalletName = walletNames.get(which);
+                                    String selectedWalletId = walletIds.get(which);
+
+//                                  Go to new activity EditWallet
+                                    Intent intent = new Intent(getContext(), EditWallet.class);
+                                    intent.putExtra("walletName", selectedWalletName);
+                                    intent.putExtra("walletId", selectedWalletId);
+                                    startActivity(intent);
+                                })
+                                .show();
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Error fetching wallets", Toast.LENGTH_SHORT).show());
+        }
+
 }

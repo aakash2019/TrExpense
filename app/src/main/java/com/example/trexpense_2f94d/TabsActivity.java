@@ -30,7 +30,7 @@ public class TabsActivity extends AppCompatActivity {
         // Set HomeFragment as the default fragment
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, fragmentMap.get(R.id.nav_home))
+                    .replace(R.id.fragment_container, fragmentMap.get(R.id.nav_profile))
                     .commit();
         }
 

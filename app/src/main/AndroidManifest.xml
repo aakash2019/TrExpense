@@ -13,6 +13,9 @@
         android:theme="@style/Theme.Trexpense2f94d"
         tools:targetApi="31">
         <activity
+            android:name=".EditWallet"
+            android:exported="false" />
+        <activity
             android:name=".TabsActivity"
             android:exported="false" />
         <activity

@@ -76,6 +76,17 @@
                 android:textColor="@android:color/white"
                 android:layout_gravity="center_horizontal" />
 
+            <Button
+                android:id="@+id/editWalletButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Edit a Wallet"
+                android:textSize="18sp"
+                android:padding="16dp"
+                android:backgroundTint="@android:color/background_dark"
+                android:textColor="@android:color/white"
+                android:layout_gravity="center_horizontal" />
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
